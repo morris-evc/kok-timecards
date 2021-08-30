@@ -17,11 +17,8 @@ for file in glob.glob("*.pdf"):
 pp.pprint(pdf_list)
 
 #using field names as column names for dataframe
-col_names = ["Job NumberRow1", "Employee Name", "Employee Number", "Total Hrs", "Total OT Hrs", "Regularhrs1", "Regularhrs2", "Regularhrs3",
-    "Regularhrs4", "Regularhrs5", "Regularhrs6", "Regularhrs7", "Overtimehrs1", "Overtimehrs2", "Overtimehrs3",
-    "Overtimehrs4", "Overtimehrs5", "Overtimehrs6", "Overtimehrs7", "Super1", "Super2", "Super3", "Super4", "Super5",
-    "Super6", "Super7"]
-
+col_names = ["Job NumberRow1", "Employee Name", "Employee Number", "Total Hrs", "Total OT Hrs", "Regularhrs", "Overtimehrs", "Super"]
+has_rows = ["Regularhrs", "Overtimehrs", "Super"]
 df = pd.DataFrame(columns=col_names)
 
 row_num = 0
@@ -41,31 +38,40 @@ for f in pdf_list:
     
     row_num += 1
     fields = reader.getFields()
-    print(fields['Equip  Repaired Line 1'].value)
+    #pp.pprint(fields)
+    #print(fields['Equip  Repaired Line 1'].value)
     #inserting data from fields into dataframe
-    for x in col_names:
-        #df = df.astype(float)
-        #df['Employee Number'] = pd.to_numeric(df['Employee Number'], downcast='float')
+    count = 1
+
+
+    while count < 8:
+        for x in col_names:
+
         
-        cell_value = fields[x].value
-        pp.pprint(cell_value)
-        try:
-            if x != 'Employee Name'and cell_value != None:
-                df[x] = pd.to_numeric(df[x], downcast='float')
-                df.loc[row_num, x] = cell_value
+            cell_value = ''
+            if x in has_rows:                        
+                print(f'{x}  {count}')
+                print(fields[f'{x}{count}'].value)
+                cell_value = fields[f'{x}{count}'].value
             else:
-                df.loc[row_num, x] = cell_value
-        except ValueError:
-        
-            df.loc[row_num, x] = cell_value
-        #formatting column width based on length of column name
-        df.to_excel(writer, sheet_name='time card', index=False, na_rep='')
-        column_width = max(df[x].astype(str).map(len).max(), len(x))
-        col_idx = df.columns.get_loc(x)
-        writer.sheets['time card'].set_column(col_idx, col_idx, column_width)
-        
-pp.pprint(df)  
-print('-----------------------------')     
-pp.pprint(fields)
+                cell_value = fields[x].value
+            #pp.pprint(cell_value)
+            try:
+                if x != 'Employee Name'and cell_value != None:
+                    df[x] = pd.to_numeric(df[x], downcast='float')
+                    df.loc[count, x] = cell_value
+                else:
+                    df.loc[count, x] = cell_value
+            except ValueError:
+            
+                df.loc[count, x] = cell_value
+            #formatting column width based on length of column name
+            df.to_excel(writer, sheet_name='time card', index=False, na_rep='')
+            column_width = max(df[x].astype(str).map(len).max(), len(x))
+            col_idx = df.columns.get_loc(x)
+            writer.sheets['time card'].set_column(col_idx, col_idx, column_width)
+            
+        count += 1
+
 writer.save()
 
