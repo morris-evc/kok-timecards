@@ -17,8 +17,8 @@ for file in glob.glob("*.pdf"):
 pp.pprint(pdf_list)
 
 #using field names as column names for dataframe
-col_names = ["Job NumberRow1", "Employee Name", "Employee Number", "Total Hrs", "Total OT Hrs", "Regularhrs", "Overtimehrs", "Super"]
-has_rows = ["Regularhrs", "Overtimehrs", "Super"]
+col_names = ["Employee Number", "Today Date", "jcco", "Job NumberRow", "CostPhase CodeRow", "Employee Name", "Class Line ", "Regularhrs", "Overtimehrs", "Equip Repaired ", "Super", "earn"]
+has_rows = ["jcco", "Job NumberRow", "CostPhase CodeRow", "Regularhrs", "Overtimehrs", "Class Line ", "Equip Repaired ", "Super", "earn"]
 df = pd.DataFrame(columns=col_names)
 
 row_num = 0
@@ -49,10 +49,22 @@ for f in pdf_list:
 
         
             cell_value = ''
-            if x in has_rows:                        
-                print(f'{x}  {count}')
-                print(fields[f'{x}{count}'].value)
-                cell_value = fields[f'{x}{count}'].value
+            if x in has_rows:  
+
+                spec = f'{x}{count}'                      
+                #print(spec)
+                #print(fields[spec].value)
+                cell_value = fields[spec].value
+
+                print("run")
+                if x == 'earn' and cell_value == '---':
+                    print('running')
+                    if fields[f'Overtimehrs{count}'].value != None:
+                        cell_value = 2
+                    else:
+                        cell_value = 1
+
+
             else:
                 cell_value = fields[x].value
             #pp.pprint(cell_value)
